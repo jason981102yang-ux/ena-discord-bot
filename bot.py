@@ -231,10 +231,9 @@ async def on_message(message: discord.Message):
         )
         await message.channel.send(reply)
 
-@client.tree.command(name="choosefood", description="繪名幫你從自訂食物中選一個（討厭紅蘿蔔；連抽會暴走）")
-
 @app_commands.describe(options="用逗號分隔，例如：咖哩飯, 拉麵, 紅蘿蔔炒蛋")
 
+@client.tree.command(name="choosefood", description="繪名幫你從自訂食物中選一個（討厭紅蘿蔔；連抽會暴走）")
 async def choosefood(interaction: discord.Interaction, options: str):
 
     items = [x.strip() for x in options.split(",") if x.strip()]
@@ -362,4 +361,3 @@ async def choosefood(interaction: discord.Interaction, options: str):
     await interaction.response.send_message(reply)
 
 client.run(TOKEN)
-
