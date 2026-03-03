@@ -122,7 +122,7 @@ def pick(level0, level1, level2, score):
     else:
         return random.choice(level0)
 
-@client.tree.command.command(name="mode", description="切換繪名聊天模式（ena/off）")
+@client.tree.command(name="mode", description="切換繪名聊天模式（ena/off）")
 @app_commands.describe(state="ena 或 off")
 async def mode(interaction: discord.Interaction, state: str):
     state = state.lower().strip()
