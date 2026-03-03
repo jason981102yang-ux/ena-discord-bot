@@ -23,10 +23,10 @@ def detect_style(text: str) -> str:
     if re.search(r"(～|啦|欸|耶|好棒|超|♡|🥺|✨)", t):
         return "mizuki"
     # 真冬風：冷淡短句 / 很多省略號 / 極少情緒詞
-    if re.search(r"(……|\.{3,})", t) or len(t) <= 4:
+    if re.search(r"(...|…|……|.)", t):
         return "mafuyu"
     # 彰人風：命令句 / 感嘆號 / 口氣衝
-    if re.search(r"(快|給我|現在|立刻|!)", t):
+    if re.search(r"(快|給我|現在|立刻)", t):
         return "akito"
     return "normal"
 
@@ -362,3 +362,4 @@ async def choosefood(interaction: discord.Interaction, options: str):
     await interaction.response.send_message(reply)
 
 client.run(TOKEN)
+
