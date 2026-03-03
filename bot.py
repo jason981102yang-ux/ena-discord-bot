@@ -23,7 +23,7 @@ def detect_style(text: str) -> str:
     if re.search(r"(～|啦|欸|耶|好棒|超|♡|🥺|✨)", t):
         return "mizuki"
     # 真冬風：冷淡短句 / 很多省略號 / 極少情緒詞
-    if re.search(r"(...|…|……|.)", t):
+    if re.search(r"(\.\.\.|…|……|\.)", t):
         return "mafuyu"
     # 彰人風：命令句 / 感嘆號 / 口氣衝
     if re.search(r"(快|給我|現在|立刻)", t):
@@ -57,7 +57,7 @@ def favor_level(score: int) -> str:
 async def on_ready():
     print(f"✅ 登入成功：{client.user} (id={client.user.id})")
 
-@client.tree.command(name="ping", description="測試機器人是否在線")
+@client.tree.command(name="ping", description="測試機器人是否在線!")
 async def ping(interaction: discord.Interaction):
     await interaction.response.send_message("pong!")
 
@@ -121,7 +121,7 @@ def pick(level0, level1, level2, score):
     else:
         return random.choice(level0)
 
-@client.tree.command(name="mode", description="切換繪名聊天模式（ena/off）")
+@app_commands.command(name="mode", description="切換繪名聊天模式（ena/off）")
 @app_commands.describe(state="ena 或 off")
 async def mode(interaction: discord.Interaction, state: str):
     state = state.lower().strip()
@@ -231,9 +231,9 @@ async def on_message(message: discord.Message):
         )
         await message.channel.send(reply)
 
-@app_commands.describe(options="用逗號分隔，例如：咖哩飯, 拉麵, 紅蘿蔔炒蛋")
 
-@client.tree.command(name="choosefood", description="繪名幫你從自訂食物中選一個（討厭紅蘿蔔；連抽會暴走）")
+@app_commands.command(name="choosefood", description="繪名幫你從自訂食物中選一個（討厭紅蘿蔔；連抽會生氣）")
+@app_commands.describe(options="用逗號分隔，例如：咖哩飯, 拉麵, 紅蘿蔔炒蛋")
 async def choosefood(interaction: discord.Interaction, options: str):
 
     items = [x.strip() for x in options.split(",") if x.strip()]
@@ -262,7 +262,7 @@ async def choosefood(interaction: discord.Interaction, options: str):
 
         await interaction.response.send_message(
 
-            f"……我現在不想講話。\n（暴走中，約 {remaining} 秒後再來）",
+            f"……我現在不想講話。\n（生氣中，約 {remaining} 秒後再來）",
 
             ephemeral=True
 
