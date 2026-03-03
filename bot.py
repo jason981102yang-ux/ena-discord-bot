@@ -55,6 +55,7 @@ def favor_level(score: int) -> str:
 
 @client.event
 async def on_ready():
+    await client.tree.sync()
     print(f"✅ 登入成功：{client.user} (id={client.user.id})")
 
 @client.tree.command(name="ping", description="測試機器人是否在線!")
@@ -121,7 +122,7 @@ def pick(level0, level1, level2, score):
     else:
         return random.choice(level0)
 
-@app_commands.command(name="mode", description="切換繪名聊天模式（ena/off）")
+@client.tree.command.command(name="mode", description="切換繪名聊天模式（ena/off）")
 @app_commands.describe(state="ena 或 off")
 async def mode(interaction: discord.Interaction, state: str):
     state = state.lower().strip()
@@ -232,7 +233,7 @@ async def on_message(message: discord.Message):
         await message.channel.send(reply)
 
 
-@app_commands.command(name="choosefood", description="繪名幫你從自訂食物中選一個（討厭紅蘿蔔；連抽會生氣）")
+@client.tree.command(name="choosefood", description="繪名幫你從自訂食物中選一個（討厭紅蘿蔔；連抽會生氣）")
 @app_commands.describe(options="用逗號分隔，例如：咖哩飯, 拉麵, 紅蘿蔔炒蛋")
 async def choosefood(interaction: discord.Interaction, options: str):
 
