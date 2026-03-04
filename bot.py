@@ -149,23 +149,23 @@ async def on_message(message: discord.Message):
 
         if style == "mizuki":
             replies = {
-                "low": ["……別用那種語氣跟我講話。", "你學她幹嘛？很吵。"],
-                "mid": ["……你學得還挺像。", "行啦，我聽到了。別再演。"],
-                "high": ["……你這樣我會不知道怎麼回。", "吵死了…但算你有心。"],
+                "low": ["……別用那種語氣跟我講話", "你學她幹嘛？很吵"],
+                "mid": ["……你學得還挺像", "行啦，我聽到了。別再演"],
+                "high": ["……你這樣我會不知道怎麼回", "吵死了…但算你有心"],
             }
 
         elif style == "mafuyu":
             replies = {
-                "low": ["不要突然變那麼冷。很煩。", "裝什麼冷淡。"],
-                "mid": ["……你到底想說什麼？", "別用那種語氣。"],
-                "high": ["……你這樣我會擔心。", "別壓抑。直接講。"],
+                "low": ["不要突然變那麼冷淡，很煩", "裝什麼冷淡"],
+                "mid": ["……你到底想說什麼？", "別用那種語氣"],
+                "high": ["……你這樣我會擔心", "別壓抑。直接說"],
             }
 
         elif style == "akito":
             replies = {
-            "low": ["吵死了。別命令我。", "你以為大聲就有用？"],
-            "mid": ["……你很急是吧。", "好啦，我知道了。"],
-            "high": ["行。就這次配合你。", "……算了，聽你的。"],
+            "low": ["吵死了，別命令我", "你以為大聲就有用？"],
+            "mid": ["……你很急是吧", "好啦，我知道了"],
+            "high": ["行，就這次配合你", "……算了，聽你的"],
             }
         else:
             return
@@ -309,7 +309,7 @@ async def choosefood(interaction: discord.Interaction, options: str):
 
         await interaction.response.send_message(
 
-            "……又是紅蘿蔔？你是想氣死我是不是。\n我走了。別吵我。",  # 這句可以再更兇一點
+            "……又是紅蘿蔔？你是想氣死我是不是？\n我走了，別吵我",  # 這句可以再更兇一點
 
         )
 
@@ -335,7 +335,7 @@ async def choosefood(interaction: discord.Interaction, options: str):
 
         else:
 
-            reply = f"今天吃 **{choice}**。\n……有紅蘿蔔的話自己挑掉。我才沒有在關心你。"
+            reply = f"今天吃 **{choice}**。\n……有紅蘿蔔的話自己挑掉，我才沒有在關心你。"
 
 
 
@@ -344,7 +344,6 @@ async def choosefood(interaction: discord.Interaction, options: str):
             reply += f"\n（繪名好感度 -{s_before - favor[uid]}）"
 
     else:
-
         if s < 3:
 
             reply = f"吃 **{choice}**。別再問了。"
