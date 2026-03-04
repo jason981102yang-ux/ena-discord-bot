@@ -19,15 +19,16 @@ class MyClient(discord.Client):
 def detect_style(text: str) -> str:
 
     t = text.strip()
-
+    head = t[:2]
+    
     # 瑞希風：可愛語尾 / 顏文字 / 拉長音
-    if re.search(r"(繪名名|～|啦|欸|耶|好棒|超|♡|✨|💕|:-D|\^_\^|:\)|：\)|XD|>_<|T_T|QAQ|orz)", t):
+    if re.search(r"(繪名名|～|啦|欸|耶|好棒|超|♡|✨|💕|:-D|\^_\^|:\)|：\)|XD|>_<|T_T|QAQ|orz)", head):
         return "mizuki"
     # 真冬風：冷淡短句 / 很多省略號 / 極少情緒詞
-    if re.search(r"(\.\.\.|…|……|\.)", t):
+    if re.search(r"(\.\.\.|…|……|\.)", head):
         return "mafuyu"
     # 彰人風：命令句 / 感嘆號 / 口氣衝
-    if re.search(r"(給我|現在|立刻)", t):
+    if re.search(r"(給我|現在|立刻)", head):
         return "akito"
     return "normal"
 
@@ -155,8 +156,8 @@ async def on_message(message: discord.Message):
     style = detect_style(content)
     # ...（這裡放原本的回覆邏輯）
 
-    # 隨機冷淡插話：例如 5% 機率觸發
-    if random.random() < 0.05:
+    # 隨機冷淡插話：例如 5% 機率觸發   目前是1%
+    if random.random() < 0.01:
         reply = random.choice(cold_comments)
         await message.channel.send(reply)
 
@@ -382,4 +383,3 @@ async def choosefood(interaction: discord.Interaction, options: str):
     await interaction.response.send_message(reply)
 
 client.run(TOKEN)
-
