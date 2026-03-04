@@ -91,7 +91,7 @@ def carrot_risk(text: str) -> str:
 
     maybe_keywords = [
 
-        "咖哩", "咖喱",
+        "咖哩", "咖喱飯",
 
         "便當",
 
@@ -382,3 +382,4 @@ async def choosefood(interaction: discord.Interaction, options: str):
     await interaction.response.send_message(reply)
 
 client.run(TOKEN)
+
