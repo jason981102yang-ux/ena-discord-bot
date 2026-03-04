@@ -7,6 +7,7 @@ import time
 import re
 
 
+
 TOKEN =  os.getenv("DISCORD_BOT_TOKEN")
 class MyClient(discord.Client):
     def __init__(self):
@@ -20,13 +21,13 @@ def detect_style(text: str) -> str:
     t = text.strip()
 
     # 瑞希風：可愛語尾 / 顏文字 / 拉長音
-    if re.search(r"(～|啦|欸|耶|好棒|超|♡|🥺|✨)", t):
+    if re.search(r"(繪名名|～|啦|欸|耶|好棒|超|♡|✨|💕|:-D|\^_\^|:\)|：\)|XD|>_<|T_T|QAQ|orz)", t):
         return "mizuki"
     # 真冬風：冷淡短句 / 很多省略號 / 極少情緒詞
     if re.search(r"(\.\.\.|…|……|\.)", t):
         return "mafuyu"
     # 彰人風：命令句 / 感嘆號 / 口氣衝
-    if re.search(r"(快|給我|現在|立刻)", t):
+    if re.search(r"(給我|現在|立刻)", t):
         return "akito"
     return "normal"
 
@@ -134,15 +135,35 @@ async def mode(interaction: discord.Interaction, state: str):
         "繪名上線" if state == "ena" else "繪名下線"
     )
 
+cold_comments = [
+    "……嗯？",
+    "你很吵。",
+    "幹嘛。",
+    "……我在。",
+    "別吵我。"
+]
+
 @client.event
 async def on_message(message: discord.Message):
-
     if message.author.bot:
         return
+
     content = message.content.strip()
     uid = str(message.author.id)
 
+    # 原本的邏輯先跑
     style = detect_style(content)
+    # ...（這裡放原本的回覆邏輯）
+
+    # 隨機冷淡插話：例如 5% 機率觸發
+    if random.random() < 0.05:
+        reply = random.choice(cold_comments)
+        await message.channel.send(reply)
+
+    # 後續的 style 判斷邏輯...
+
+    if message.author.bot:
+        return
 
     if style != "normal":
         lvl = favor_level(favor[uid])
