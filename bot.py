@@ -8,7 +8,13 @@ import asyncio
 
 import datetime
 
+
+
 from openai import AsyncOpenAI, DefaultAioHttpClient
+
+
+
+print("=== BOT VERSION 1209-AIOHTTP ===")
 
 
 
@@ -25,8 +31,8 @@ client = AsyncOpenAI(
 )
 
 
-DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
 
+DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
 
 
 
@@ -296,6 +302,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
