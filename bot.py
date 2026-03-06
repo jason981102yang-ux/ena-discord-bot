@@ -154,10 +154,9 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
     except Exception as e:
 
-        print("OpenAI error:", e)
+        print("OpenAI error 詳細內容：", repr(e))
 
-        return "嘖，剛剛有點卡住了。"
-
+        return f"AI出錯了：{e}"
 
 
 # ===== 超時檢查 =====
