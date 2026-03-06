@@ -1,3 +1,4 @@
 discord.py
-openai
-asyncio
+openai>=1.14.0
+httpx
+
