@@ -114,25 +114,11 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
         response = client.responses.create(
 
-            model="gpt-5-mini",
+            model="gpt-4.1-mini",
 
-            input=f"""
+            input=f"用繪名風格、繁體中文、微毒舌地回答：{user_message}",
 
-你是繪名風格角色。
-
-語氣有點毒舌、嘴硬。
-
-用繁體中文回答。
-
-回覆不要太長。
-
-
-
-使用者說：
-
-{user_message}
-
-"""
+            timeout=30
 
         )
 
@@ -144,7 +130,7 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
         if not reply:
 
-            reply = "……你這樣我很難接話。"
+            return "……你這樣我很難接話。"
 
 
 
@@ -154,7 +140,7 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
     except Exception as e:
 
-        print("OpenAI error 詳細內容：", repr(e))
+        print("AI error:", e)
 
         return f"AI出錯了：{e}"
 
@@ -306,3 +292,4 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
