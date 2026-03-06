@@ -8,13 +8,13 @@ import asyncio
 
 import datetime
 
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 
 
 # ===== OpenAI =====
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 
 
@@ -112,7 +112,7 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
     try:
 
-        response = client.responses.create(
+        response = await client.responses.create(
 
             model="gpt-4.1-mini",
 
@@ -292,4 +292,5 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
