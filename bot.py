@@ -9,6 +9,7 @@ print("=== BOT VERSION CHECK 1215 ===")
 print("OPENAI_API_KEY exists:", bool(os.environ.get("OPENAI_API_KEY")))
 print("DISCORD_BOT_TOKEN exists:", bool(os.environ.get("DISCORD_BOT_TOKEN")))
 print("=== BOT VERSION 1209-AIOHTTP ===")
+print("NEW VERSION DEPLOY TEST")
 
 client = AsyncOpenAI(
 
@@ -295,6 +296,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
