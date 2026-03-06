@@ -1,18 +1,13 @@
 import os
-
-import discord
-
+import discor
 from discord.ext import commands, tasks
-
 import asyncio
-
 import datetime
-
-
-
 from openai import AsyncOpenAI, DefaultAioHttpClient
 
-
+print("=== BOT VERSION CHECK 1215 ===")
+print("OPENAI_API_KEY exists:", bool(os.environ.get("OPENAI_API_KEY")))
+print("DISCORD_BOT_TOKEN exists:", bool(os.environ.get("DISCORD_BOT_TOKEN")))
 
 print("=== BOT VERSION 1209-AIOHTTP ===")
 
@@ -148,13 +143,12 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
         return reply
 
-
-
     except Exception as e:
 
-        print("AI error 詳細：", repr(e))
+    print("AI error 詳細：", repr(e))
 
-        return f"AI出錯了：{type(e).__name__}: {e}"
+    return f"AI出錯了：{type(e).__name__}: {e}
+    
 # ===== 超時檢查 =====
 
 @tasks.loop(seconds=5)
@@ -302,6 +296,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
