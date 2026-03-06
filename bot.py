@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 import datetime
-from openai import AsyncOpenAI
+from openai import OpenAI
 
 print("=== BOT VERSION CHECK 1215 ===")
 print("OPENAI_API_KEY exists:", bool(os.environ.get("OPENAI_API_KEY")))
@@ -11,7 +11,7 @@ print("DISCORD_BOT_TOKEN exists:", bool(os.environ.get("DISCORD_BOT_TOKEN")))
 print("=== BOT VERSION 1209-AIOHTTP ===")
 print("NEW VERSION DEPLOY TEST")
 
-client = AsyncOpenAI(
+client = OpenAI(
 
     api_key=os.environ.get("OPENAI_API_KEY"),
 
@@ -111,7 +111,7 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
 
 
-        response = await client.responses.create(
+        response = client.responses.create(
 
             model="gpt-4.1-mini",
 
@@ -145,7 +145,8 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
         print("AI error 詳細：", repr(e))
 
-        return f"AI出錯了：{type(e).__name__}: {e}"
+        return f"AI出錯了：{repr(e)}"
+
 
 
 # ===== 超時檢查 =====
@@ -290,25 +291,6 @@ async def test(ctx):
 
     await send_with_typing(ctx.channel, "機器人運行正常。")
 
-
-
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
