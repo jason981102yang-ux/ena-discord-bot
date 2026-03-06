@@ -111,25 +111,23 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
 
 
-        response = await client.chat.completions.create(
+        response = await client.responses.create(
 
             model="gpt-4.1-mini",
 
-            messages=[
+            input=[
 
                 {"role": "system", "content": SYSTEM_PROMPT},
 
                 {"role": "user", "content": user_message}
 
-            ],
-
-            timeout=30
+            ]
 
         )
 
 
 
-        reply = response.choices[0].message.content
+        reply = response.output_text
 
 
 
@@ -148,7 +146,6 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
         print("AI error 詳細：", repr(e))
 
         return f"AI出錯了：{type(e).__name__}: {e}"
-    
 # ===== 超時檢查 =====
 
 @tasks.loop(seconds=5)
@@ -296,6 +293,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
