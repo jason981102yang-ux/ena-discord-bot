@@ -145,7 +145,7 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
     except Exception as e:
         print("AI error 詳細：", repr(e))
-        return f"AI出錯了：{type(e).__name__}: {e}
+        return f"AI出錯了：{type(e).__name__}: {e}"
     
 # ===== 超時檢查 =====
 
@@ -294,6 +294,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
