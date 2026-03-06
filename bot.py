@@ -1,5 +1,5 @@
 import os
-import discor
+import discord
 from discord.ext import commands, tasks
 import asyncio
 import datetime
@@ -294,6 +294,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
