@@ -223,7 +223,7 @@ async def on_message(message):
 
         conversation_memory.pop(user_id, None)  # 每次重新啟動，對話重新開始
 
-        await send_with_typing(message.channel, "幹嘛叫我？有話快說。")
+        await send_with_typing(message.channel, "幹嘛叫我？這是最新railway版。")
 
         return
 
@@ -296,6 +296,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
