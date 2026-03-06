@@ -12,15 +12,20 @@ from openai import AsyncOpenAI
 
 
 
-# ===== OpenAI =====
+client = AsyncOpenAI(
 
-client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    api_key=os.environ.get("OPENAI_API_KEY"),
+
+    timeout=20.0,
+
+    max_retries=2,
+
+)
 
 
-
-# ===== Discord =====
 
 DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+
 
 
 
@@ -116,9 +121,9 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
             model="gpt-4.1-mini",
 
-            input=f"用繪名風格、繁體中文、微毒舌地回答：{user_message}",
+            instructions=SYSTEM_PROMPT,
 
-            timeout=30
+            input=user_message,
 
         )
 
@@ -140,11 +145,9 @@ async def get_ai_reply(user_id: int, user_message: str) -> str:
 
     except Exception as e:
 
-        print("AI error:", e)
+        print("AI error 詳細：", repr(e))
 
-        return f"AI出錯了：{e}"
-
-
+        return f"AI出錯了：{type(e).__name__}: {e}"
 # ===== 超時檢查 =====
 
 @tasks.loop(seconds=5)
@@ -292,5 +295,6 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
