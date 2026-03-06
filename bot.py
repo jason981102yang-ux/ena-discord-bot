@@ -8,7 +8,7 @@ import asyncio
 
 import datetime
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, DefaultAioHttpClient
 
 
 
@@ -20,8 +20,9 @@ client = AsyncOpenAI(
 
     max_retries=2,
 
-)
+    http_client=DefaultAioHttpClient(),
 
+)
 
 
 DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
@@ -295,6 +296,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
