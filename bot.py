@@ -8,27 +8,16 @@ from openai import AsyncOpenAI, DefaultAioHttpClient
 print("=== BOT VERSION CHECK 1215 ===")
 print("OPENAI_API_KEY exists:", bool(os.environ.get("OPENAI_API_KEY")))
 print("DISCORD_BOT_TOKEN exists:", bool(os.environ.get("DISCORD_BOT_TOKEN")))
-
 print("=== BOT VERSION 1209-AIOHTTP ===")
 
-
-
 client = AsyncOpenAI(
-
     api_key=os.environ.get("OPENAI_API_KEY"),
-
-    timeout=20.0,
-
-    max_retries=2,
-
     http_client=DefaultAioHttpClient(),
-
+    timeout=20.0,
+    max_retries=2,
 )
 
-
-
 DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
-
 
 
 intents = discord.Intents.default()
@@ -306,6 +295,7 @@ async def test(ctx):
 # ===== 啟動 bot =====
 
 bot.run(DISCORD_BOT_TOKEN)
+
 
 
 
