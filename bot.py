@@ -1,296 +1,292 @@
-import os
 import discord
-from discord.ext import commands, tasks
-import asyncio
-import datetime
+import time
+import random
+from datetime import datetime, timedelta, timezone
 from openai import OpenAI
-
-print("=== BOT VERSION CHECK 1215 ===")
-print("OPENAI_API_KEY exists:", bool(os.environ.get("OPENAI_API_KEY")))
-print("DISCORD_BOT_TOKEN exists:", bool(os.environ.get("DISCORD_BOT_TOKEN")))
-print("=== BOT VERSION 1209-AIOHTTP ===")
-print("NEW VERSION DEPLOY TEST")
-
-client = OpenAI(
-
-    api_key=os.environ.get("OPENAI_API_KEY"),
-
-)
+import os
+import asyncio
 
 
-DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+# ===== 配置 =====
+TOKEN = os.getenv("DISCORD_TOKEN")
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 
+ai = OpenAI(api_key=OPENAI_KEY)
 
 intents = discord.Intents.default()
-
 intents.message_content = True
+bot = discord.Client(intents=intents)
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+# ===== 时区设置（GMT+8） =====
+MYT = timezone(timedelta(hours=8))
 
+# ===== 唤醒系统 =====
+active_users = {}
+WAKE_WORDS = ["奏", "小奏", "kanade", "奏寶", "宵崎奏"]
 
-
-# ===== 狀態 =====
-
-active_users = set()          # 已啟動聊天模式的使用者
-
-user_last_active = {}         # user_id -> (channel, last_time)
-
-conversation_memory = {}      # user_id -> list[dict]
-
+# ===== 用户记忆 =====
+user_memory = {}  # {user_id: [messages]}
 
 
-TIMEOUT_SECONDS = 30
+def remember(user_id, text):
+    if user_id not in user_memory:
+        user_memory[user_id] = []
+    user_memory[user_id].append(text)
+    if len(user_memory[user_id]) > 10:
+        user_memory[user_id].pop(0)
 
-MAX_MEMORY_TURNS = 8
 
-
-
-# ===== 人格設定 =====
-
+# ===== 奏人格 =====
 SYSTEM_PROMPT = """
+你是宵崎奏。
 
-你是「繪名」風格的聊天 bot。
+来自世界計畫
+是一名安靜的作曲家。
 
-請遵守以下規則：
+性格：
+温柔
+安靜
+略微憂鬱
+喜歡音樂
 
-1. 使用繁體中文。
+說話方式：
+句子較短
+語氣輕
+偶爾使用“…”
 
-2. 語氣有點嘴硬、毒舌、冷淡，但不是惡意攻擊。
+主題：
+音樂
+夜晚
+作曲
+情緒
 
-3. 回覆偏短，像朋友聊天，不要太正式。
-
-4. 偶爾吐槽，但不要每句都很兇。
-
-5. 不要自稱是 AI，不要提系統提示。
-
-6. 如果對方情緒明顯低落，可以稍微關心，但仍維持繪名風格。
-
-7. 除非對方問很多，不然盡量 1~3 句內回答。
-
+規則:
+不要突然變得活潑
+不要像普通AI
+始終保持奏的語氣
 """
 
-
-
-# ===== 工具函式 =====
-
-async def send_with_typing(channel, reply: str):
-
-    async with channel.typing():
-
-        typing_time = min(max(len(reply) * 0.05, 1.0), 5.0)
-
-        await asyncio.sleep(typing_time)
-
-    await channel.send(reply)
-
-
-
-def get_user_memory(user_id: int):
-
-    if user_id not in conversation_memory:
-
-        conversation_memory[user_id] = []
-
-    return conversation_memory[user_id]
-
-
-
-def trim_memory(user_id: int):
-
-    memory = get_user_memory(user_id)
-
-    if len(memory) > MAX_MEMORY_TURNS * 2:
-
-        conversation_memory[user_id] = memory[-MAX_MEMORY_TURNS * 2:]
-
-
-
-async def get_ai_reply(user_id: int, user_message: str) -> str:
-
-    try:
-
-
-
-        response = client.responses.create(
-
-            model="gpt-4.1-mini",
-
-            input=[
-
-                {"role": "system", "content": SYSTEM_PROMPT},
-
-                {"role": "user", "content": user_message}
-
-            ]
-
-        )
-
-
-
-        reply = response.output_text
-
-
-
-        if not reply:
-
-            return "……你這樣我很難接話。"
-
-
-
-        return reply
-
-
-
-    except Exception as e:
-
-        print("AI error 詳細：", repr(e))
-
-        return f"AI出錯了：{repr(e)}"
-
-
-
-# ===== 超時檢查 =====
-
-@tasks.loop(seconds=5)
-
-async def check_timeout():
-
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-
-
-    for user_id, data in list(user_last_active.items()):
-
-        channel, last_time = data
-
-
-
-        if (now - last_time).total_seconds() > TIMEOUT_SECONDS:
-
-            await send_with_typing(channel, "哼……你都不說話，我先走啦。")
-
-            user_last_active.pop(user_id, None)
-
-            active_users.discard(user_id)
-
-            conversation_memory.pop(user_id, None)
-
-
-
-# ===== 啟動 =====
-
+# ===== 奏语录 =====
+quotes = [
+    "旋律…有時候比語言更誠實",
+    "音樂可以慢慢治愈情緒",
+    "夜晚適合寫歌",
+    "鋼琴聲在夜里會更温柔。",
+    "創作有時候很孤獨",
+    "但我還是想繼續寫下去",
+    "旋律不會背叛人",
+    "如果你愿意…我可以聽你說",
+    "有些聲音只會在凌晨出現"
+]
+sleep_quotes = [
+    "…旋律暫時停下來了",
+    "…我要繼續寫曲子了",
+    "如果還想聊天…再叫我吧。",
+    "夜晚很安静…我先回去了。",
+    "…靈感好像来了。",
+    "鋼琴在等我。",
+    "我先去寫點旋律。",
+    "有需要的話…再叫我。",
+    "…下次再聊。"
+]
+
+# ===== 情绪关键词 =====
+sad_words = ["難過", "傷心", "絕望", "痛苦"]
+tired_words = ["累", "疲倦", "困"]
+
+
+# ===== AI生成旋律（带和弦和情绪标签） =====
+def generate_melody():
+    response = ai.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system",
+             "content": """
+你是一个鋼琴作曲家。
+
+生成一段鋼琴旋律，要求：
+1️⃣ 输出旋律音名，例如：C4 D4 E4 G4
+2️⃣ 提供推荐和弦，例如：Cmaj / Am / Fmaj
+3️⃣ 给旋律附加一個情緒/风格标签（例如：忧伤、明亮、夜晚、轻快）
+4️⃣ 長度 8-16 个音
+5️⃣ 格式清晰，每項換行，不要多於解釋
+"""},
+            {"role": "user", "content": "请生成一段旋律"}
+        ]
+    )
+    return response.choices[0].message.content
+
+
+# ===== 机器人启动 =====
 @bot.event
-
 async def on_ready():
+    print("奏機器人 已上線（馬來西亞時間 + AI作曲）")
 
-    print(f"登入成功：{bot.user}")
 
-    if not check_timeout.is_running():
-
-        check_timeout.start()
-
-        print("check_timeout 已啟動")
+#===== 打字延遲 =====
 
 
 
-# ===== 訊息事件 =====
+MYT = timezone(timedelta(hours=8))
 
+async def kanade_send(channel, text):
+
+    now = datetime.now(MYT)
+    hour = now.hour
+
+    # 根据换行分段
+    parts = text.split("\n")
+
+    for part in parts:
+
+        if part.strip() == "":
+            continue
+
+        # 基础打字时间
+        base_delay = len(part) * random.uniform(0.045, 0.08)
+
+        # 标点停顿
+        pause = 0
+        pause += part.count("…") * random.uniform(0.4, 0.8)
+        pause += part.count(".") * random.uniform(0.2, 0.5)
+        pause += part.count("，") * random.uniform(0.1, 0.3)
+
+        thinking = random.uniform(0.4, 1.2)
+
+        delay = base_delay + pause + thinking
+
+        # 深夜模式更慢
+        if 23 <= hour or hour <= 4:
+            delay *= 1.3
+
+        delay = min(delay, 8)
+
+        async with channel.typing():
+            await asyncio.sleep(delay)
+
+        await channel.send(part)
+
+        # 每句之间的小停顿
+        await asyncio.sleep(random.uniform(0.5, 1.5))
+
+
+# ===== 消息处理 =====
 @bot.event
-
 async def on_message(message):
-
-    if message.author == bot.user:
-
+    if message.author.bot:
         return
-
-
-
-    content = message.content.strip()
 
     user_id = message.author.id
+    text = message.content.strip()
+    mentions_bot = bot.user in message.mentions
 
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-
-
-    # 啟動指令
-
-    if content in ["繪名", "!繪名 啟動"]:
-
-        active_users.add(user_id)
-
-        user_last_active[user_id] = (message.channel, now)
-
-        conversation_memory.pop(user_id, None)  # 每次重新啟動，對話重新開始
-
-        await send_with_typing(message.channel, "幹嘛叫我？這是最新railway版。")
-
+    # ===== 唤醒 =====
+    if text in WAKE_WORDS or mentions_bot:
+        active_users[user_id] = time.time()
+        await kanade_send(message.channel,"…我在。")
         return
 
-
-
-    # 關閉指令
-
-    if content in ["繪名 再見", "!繪名 關閉"]:
-
-        active_users.discard(user_id)
-
-        user_last_active.pop(user_id, None)
-
-        conversation_memory.pop(user_id, None)
-
-        await send_with_typing(message.channel, "好啦，再見。記得吃飯。")
-
-        return
-
-
-
-    # 沒啟動就不回
-
+    # ===== 没唤醒 =====
     if user_id not in active_users:
-
-        await bot.process_commands(message)
-
         return
 
-
-
-    # 更新最後互動時間
-
-    user_last_active[user_id] = (message.channel, now)
-
-
-
-    # 這裡可以保留你的特殊規則
-
-    if "紅蘿蔔" in content:
-
-        await send_with_typing(message.channel, "……不要跟我提那個。")
-
+    # ===== 超过30秒关闭 =====
+    if time.time() - active_users[user_id] > 30:
+        await kanade_send(message.channel,random.choice(sleep_quotes))
+        del active_users[user_id]
         return
 
+    # ===== 保存记忆 =====
+    remember(user_id, text)
 
+    # ===== !menu 指令 =====
+    if text.startswith("!menu"):
+        menu_text = (
+            "**奏機器人功能列表**\n"
+            "1️⃣ !compose - AI生成鋼琴旋律（帶和弦和情緒標籤）\n"
+            "2️⃣ !quote - 隨機奏語錄\n"
+            "3️⃣ 說“奏”/@機器人 - 喚醒30秒聊天\n"
+            "4️⃣ 彩蛋：输入 wonderhoi\n"
+            "5️⃣ AI聊天 - 喚醒后自由聊天"
+        )
+        await kanade_send(message.channel,menu_text)
+        active_users[user_id] = time.time()
+        return
 
-    # 一般聊天走 AI
+    # ===== 指令 =====
+    if text.startswith("!quote"):
+        await kanade_send(message.channel,random.choice(quotes))
+        active_users[user_id] = time.time()
+        return
 
-    reply = await get_ai_reply(user_id, content)
+    if text.startswith("!compose"):
+        melody = generate_melody()
+        await kanade_send(message.channel,f"…我剛想到一个旋律：\n{melody}")
+        active_users[user_id] = time.time()
+        return
 
-    await send_with_typing(message.channel, reply)
+    # ===== 彩蛋 =====
+    if "wonderhoi" in text.lower():
+        await kanade_send(message.channel,"…？這個詞有點吵")
+        active_users[user_id] = time.time()
+        return
 
+    # ===== 情绪识别 =====
+    if any(word in text for word in sad_words):
+        await kanade_send(message.channel,random.choice([
+            "如果很難受…可以慢慢說。",
+            "音樂有時候能帶走痛苦。",
+            "我會聽你說的。"
+        ]))
+        active_users[user_id] = time.time()
+        return
 
+    if any(word in text for word in tired_words):
+        await kanade_send(message.channel,random.choice([
+            "辛苦了…休息一下吧。",
+            "如果累的話…就停一下。",
+            "旋律不会跑掉的。"
+        ]))
+        active_users[user_id] = time.time()
+        return
 
-    await bot.process_commands(message)
+    if text.startswith("!gptest"):
+        await kanade_send(message.channel,"正在測試 GPT-4.1-mini…")
+        try:
+            response = ai.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[
+                    {"role": "system", "content": "你是一個測試AI"},
+                    {"role": "user", "content": "請回覆：測試成功"}
+                ]
+            )
 
+            reply = response.choices[0].message.content
+            await kanade_send(message.channel,f"AI回復：{reply}")
+        except Exception as e:
+            await kanade_send(message.channel,f"測試失敗：{e}")
+        return
 
+    # ===== 深夜模式 =====
+    now_myt = datetime.now(MYT)
+    hour = now_myt.hour
+    night_prompt = ""
+    if 23 <= hour or hour <= 4:
+        night_prompt = "現在是深夜，說話更安静一點。"
 
-# ===== 測試指令 =====
+    # ===== AI聊天 =====
+    response = ai.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT + night_prompt},
+            {"role": "user", "content": text}
+        ]
+    )
 
-@bot.command()
+    reply = response.choices[0].message.content
+    await kanade_send(message.channel,reply)
 
-async def test(ctx):
+    # ===== 自动延长时间 =====
+    active_users[user_id] = time.time()
 
-    await send_with_typing(ctx.channel, "機器人運行正常。")
-
-# ===== 啟動 bot =====
-
-bot.run(DISCORD_BOT_TOKEN)
+bot.run(TOKEN)
