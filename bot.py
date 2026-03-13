@@ -6,7 +6,6 @@ from openai import OpenAI
 import os
 import asyncio
 
-
 # ===== 配置 =====
 TOKEN = os.getenv("DISCORD_TOKEN")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
@@ -290,3 +289,4 @@ async def on_message(message):
     active_users[user_id] = time.time()
 
 bot.run(TOKEN)
+
