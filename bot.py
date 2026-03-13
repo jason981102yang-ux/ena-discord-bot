@@ -259,6 +259,7 @@ async def on_message(message):
                     {"role": "user", "content": "請回覆：測試成功"}
                 ]
             )
+            await kanade_send(message.channel,f">>　{response}")
 
             reply = response.choices[0].message.content
             await kanade_send(message.channel,f"AI回復：{reply}")
@@ -289,4 +290,5 @@ async def on_message(message):
     active_users[user_id] = time.time()
 
 bot.run(TOKEN)
+
 
